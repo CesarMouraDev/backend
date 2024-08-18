@@ -1,4 +1,4 @@
-onst { uri } = require('../config/database.js');
+const { uri } = require('../config/database.js');
 
 const { Sequelize, DataTypes, QueryTypes } = require('sequelize');
 
@@ -37,6 +37,7 @@ const Category = sequelize.define(
         name: {
             type: DataTypes.STRING,
             allowNull: false,
+          
         },
         slug: {
             type: DataTypes.STRING,
