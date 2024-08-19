@@ -1,27 +1,46 @@
-const { createServer } = require('node:http');
-const http = require('http');
+const { createServer } = require('http');
+const { listarProdutos, adicionarProduto, removerProduto } = require('./src/router/produtos');
 const hostname = '127.0.0.1'; 
-const port = 3000
+const port = 3000;
+const dados = { listarProdutos, adicionarProduto, removerProduto };
+
 const server = createServer((request, response) => {
+    const { url, method } = request;
 
-    console.log("Metodos/Verbos:" + request.method);
-    console.log("URL:" + request.url);
+    console.log("URL -", url);
+    console.log("Métodos/Verbos -", method);
 
+    if (url === "/") {
+        response.writeHead(200, { 'Content-Type': 'text/html' });
+        return response.end('<h1>Aqui é a página inicial</h1>');
+    }
 
-    response.writeHead(200, { 'Content-Type': 'text/html' });
-    response.end('<h1>Hello World</h1>');
-} );
+    if (url === "/produtos" && method === "GET") {
+        response.writeHead(200, { 'Content-Type': 'application/json' });
+        return response.end(JSON.stringify(dados));
+    }
 
-server.listen(port, hostname, () => 
-    { console.log(`Servidor rodando em http://${hostname}:${port}/`); });
+    if (url === "/produtos/adicionar" && method === "POST") {
+        const novoProduto = {
+            id: listarProdutos().length + 1,
+            nome: 'Monitor',
+            valor: 3000
+        };
+        const resultado = adicionarProduto(novoProduto);
+        response.writeHead(200, { 'Content-Type': 'application/json' });
+        return response.end(JSON.stringify(resultado));
+    }
 
+    if (url === "/produtos/remover" && method === "DELETE") {
+        const resultado = removerProduto();
+        response.writeHead(200, { 'Content-Type': 'application/json' });
+        return response.end(JSON.stringify(resultado));
+    }
 
-//const http = require('http');   
-//const hostname = '127.0.0.1'; 
-//const port = 3000; 
-//const server = http.createServer((req, res) => { res.statusCode = 200; // Código de status HTTP 200 (OK) 
-//    res.setHeader('Content-Type', 'text/html'); // Definindo o tipo de conteúdo como HTML 
-//    res.end('<h1>Olá, mundo!</h1>'); // Enviando a resposta });
-//
-//server.listen(port, hostname, () => { console.log(`Servidor rodando em http://${hostname}:${port}/`); });
-//
+    response.writeHead(404, { 'Content-Type': 'text/html' });
+    response.end('<h1>Página não encontrada</h1>');
+});
+
+server.listen(port, hostname, () => {
+    console.log(`Servidor rodando em http://${hostname}:${port}/`);
+});
